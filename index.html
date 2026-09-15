@@ -1,1 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 适配手机屏幕 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>中秋快乐</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2a6c, #2a4066, #4b2c5e);
+            font-family: 'Microsoft YaHei', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
+        /* 月亮背景 */
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00;
+            animation: glow 3s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00; }
+            to { box-shadow: 0 0 60px #fffacd, 0 0 100px #ffa500; }
+        }
+
+        /* 弹窗样式 */
+        .popup {
+            position: absolute;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            pointer-events: none; /* 防止遮挡点击 */
+            animation: floatUp 3s ease-out forwards;
+            white-space: nowrap;
+        }
+
+        /* 向上飘动并消失的动画 */
+        @keyframes floatUp {
+            0% { opacity: 0; transform: scale(0.5) translateY(0); }
+            20% { opacity: 1; transform: scale(1) translateY(-20px); }
+            80% { opacity: 1; transform: scale(1) translateY(-100px); }
+            100% { opacity: 0; transform: scale(0.8) translateY(-150px); }
+        }
+
+        /* 底部点击提示 */
+        .hint {
+            position: absolute;
+            bottom: 30px;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            width: 100%;
+            text-align: center;
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="moon"></div>
+    <div class="hint">点击屏幕任意位置结束</div>
+
+    <script>
+        // ⚠️ 请在这里修改你的名字
+        const senderName = "康承健"; 
+
+        const messages = [
+            "中秋快乐", "阖家团圆", "花好月圆", "月饼甜甜", 
+            "幸福安康", "万事如意", "月圆人圆", "心想事成", 
+            "平安喜乐", "好运连连",
+            `来自 ${senderName} 的祝福`,
+            `${senderName}祝你中秋快乐`
+        ];
+
+        const colors = [
+            "#FFB6C1", "#ADD8E6", "#90EE90", "#FFFACD", 
+            "#E6E6FA", "#FFDAB9", "#87CEEB", "#DDA0DD", 
+            "#F0E68C", "#E0FFFF", "#FFE4E1"
+        ];
+
+        let popupCount = 0;
+        const maxPopups = 150; // 防止手机卡顿，最多生成150个
+        let isActive = true;
+
+        function createPopup() {
+            if (!isActive || popupCount >= maxPopups) return;
+
+            const div = document.createElement('div');
+            div.className = 'popup';
+            
+            // 随机文字、颜色和位置
+            div.innerText = messages[Math.floor(Math.random() * messages.length)];
+            div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // 限制在屏幕范围内 (避开边缘)
+            const left = Math.random() * 80 + 10; // 10% - 90%
+            const top = Math.random() * 80 + 10;  // 10% - 90%
+            div.style.left = left + 'vw';
+            div.style.top = top + 'vh';
+            
+            // 随机轻微旋转
+            const rotate = Math.random() * 20 - 10;
+            div.style.transform = `rotate(${rotate}deg)`;
+
+            document.body.appendChild(div);
+            popupCount++;
+
+            // 动画结束后自动删除元素，释放内存
+            setTimeout(() => {
+                if(div.parentNode) {
+                    div.parentNode.removeChild(div);
+                }
+            }, 3000);
+        }
+
+        // 开始散落弹窗（每80毫秒生成一个）
+        const interval = setInterval(() => {
+            createPopup();
+            if (popupCount >= maxPopups) {
+                clearInterval(interval);
+            }
+        }, 80);
+
+        // 点击屏幕结束动画并显示大祝福
+        document.body.addEventListener('click', function() {
+            if (!isActive) return;
+            isActive = false;
+            clearInterval(interval);
+            
+            // 清空所有小弹窗
+            document.querySelectorAll('.popup').forEach(el => el.remove());
+            document.querySelector('.hint').style.display = 'none';
+
+            // 显示居中的最终祝福
+            const finalCard = document.createElement('div');
+            finalCard.style.cssText = `
+                position: absolute;
+                background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+                padding: 30px 40px;
+                border-radius: 20px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            `;
+            finalCard.innerHTML = `
+                <h1 style="margin:0; color:#fff; font-size:24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">
+                    🌕 中秋快乐 🌕
+                </h1>
+                <p style="margin:15px 0 0; color:#fff; font-size:16px;">
+                    ${senderName} 祝您阖家团圆，万事如意！
+                </p>
+            `;
+            
+            // 添加弹出动画
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes popIn {
+                    0% { transform: scale(0); opacity: 0; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(finalCard);
+        });
+    </script>
+</body>
+</html>
